@@ -1,4 +1,6 @@
-package model.loan;
+package models;
+
+import java.io.Serializable;
 
 /**
  *
@@ -6,7 +8,7 @@ package model.loan;
  * request that a client submits to get a loan.
  *
  */
-public class LoanRequest {
+public class LoanRequest implements Serializable{
 
     private int ssn; // unique client number.
     private int amount; // the ammount to borrow

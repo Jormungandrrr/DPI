@@ -1,6 +1,6 @@
 package forms;
 
-import model.loan.LoanRequest;
+import models.LoanRequest;
 import models.BankInterestReply;
 import models.BankInterestRequest;
 

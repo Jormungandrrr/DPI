@@ -120,20 +120,28 @@ public class LoanBrokerFrame extends JFrame {
             list.repaint();
         }
     }
-
-    public void Listen() {
-        try {
-
-            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+    
+    public void Connect() throws JMSException{
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
             connectionFactory.setTrustedPackages(Arrays.asList("models"));
             connection = connectionFactory.createConnection();
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             destination = session.createQueue("loan");
             consumer = session.createConsumer(destination);
+    }
+    
+    public void Dissconect() throws JMSException{
+            consumer.close();
+            session.close();
+            connection.close();
+    }
 
+    public void Listen() {
+        try {
+
+            Connect();
             Message message = consumer.receive(1000);
-
             if (message instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) message;
                 String text = textMessage.getText();
@@ -141,10 +149,6 @@ public class LoanBrokerFrame extends JFrame {
             } else {
                 System.out.println("Received: " + message);
             }
-
-//            consumer.close();
-//            session.close();
-//            connection.close();
         } catch (Exception e) {
             System.out.println("Caught: " + e);
             e.printStackTrace();

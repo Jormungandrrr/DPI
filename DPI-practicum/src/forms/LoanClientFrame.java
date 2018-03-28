@@ -202,8 +202,12 @@ public class LoanClientFrame extends JFrame {
         destination = session.createQueue("loan");
         producer = session.createProducer(destination);
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-//        session.close();
-//        connection.close();
+    }
+    
+        public void Dissconect() throws JMSException{
+            producer.close();
+            session.close();
+            connection.close();
     }
 
     private void sendRequest(Serializable object) throws JMSException {

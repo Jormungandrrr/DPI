@@ -49,7 +49,6 @@ public class LoanClientFrame extends JFrame {
 
     private Connection connection;
     private Session session;
-    private Destination destination;
     private MessageProducer producer;
 
     /**
@@ -199,8 +198,7 @@ public class LoanClientFrame extends JFrame {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        destination = session.createQueue("loan");
-        producer = session.createProducer(destination);
+        producer = session.createProducer(session.createQueue("Loan"));
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
     }
     

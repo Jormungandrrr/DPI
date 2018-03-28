@@ -6,6 +6,20 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.jms.Connection;
+import javax.jms.DeliveryMode;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -18,9 +32,11 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import models.BankInterestReply;
 import models.BankInterestRequest;
+import models.LoanRequest;
 import models.RequestReply;
+import org.apache.activemq.ActiveMQConnectionFactory;
 
-public class JMSBankFrame extends JFrame {
+public class JMSBankFrame extends JFrame implements MessageListener {
 
     /**
      *
@@ -29,6 +45,11 @@ public class JMSBankFrame extends JFrame {
     private JPanel contentPane;
     private JTextField tfReply;
     private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
+
+    private Connection connection;
+    private Session session;
+    private MessageProducer producer;
+    private MessageConsumer consumer;
 
     /**
      * Launch the application.
@@ -50,6 +71,12 @@ public class JMSBankFrame extends JFrame {
      * Create the frame.
      */
     public JMSBankFrame() {
+        try {
+            Connect();
+        } catch (JMSException ex) {
+            Logger.getLogger(JMSBankFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         setTitle("JMS Bank - ABN AMRO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
@@ -102,7 +129,11 @@ public class JMSBankFrame extends JFrame {
                 if (rr != null && reply != null) {
                     rr.setReply(reply);
                     list.repaint();
-                    // todo: sent JMS message with the reply to Loan Broker
+                }
+                try {
+                    sendReply(rr);
+                } catch (JMSException ex) {
+                    Logger.getLogger(JMSBankFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -113,4 +144,41 @@ public class JMSBankFrame extends JFrame {
         contentPane.add(btnSendReply, gbc_btnSendReply);
     }
 
+    private void Connect() throws JMSException {
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        connectionFactory.setTrustedPackages(Arrays.asList("models"));
+        connection = connectionFactory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        consumer = session.createConsumer(session.createQueue("Bank"));
+        consumer.setMessageListener(this);
+        producer = session.createProducer(session.createQueue("Loan"));
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+    }
+
+    public void sendReply(RequestReply rr) throws JMSException {
+        ObjectMessage objectMessage = session.createObjectMessage();
+        objectMessage.setObject(rr);
+        producer.send(objectMessage);
+    }
+
+    @Override
+    public void onMessage(Message msg) {
+        try {
+            String msgText = msg.toString();
+            System.out.println(msgText);
+
+            if (msg instanceof ObjectMessage) {
+
+                Object o = ((ObjectMessage) msg).getObject();
+
+                if (o instanceof BankInterestRequest) {
+                    BankInterestRequest bir = (BankInterestRequest) o;
+                    listModel.addElement(new RequestReply(bir, null));
+                }
+            }
+        } catch (JMSException ex) {
+            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

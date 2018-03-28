@@ -8,12 +8,14 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -27,9 +29,10 @@ import javax.swing.border.EmptyBorder;
 import models.LoanRequest;
 import models.BankInterestReply;
 import models.BankInterestRequest;
+import models.RequestReply;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-public class LoanBrokerFrame extends JFrame {
+public class LoanBrokerFrame extends JFrame implements MessageListener {
 
     /**
      *
@@ -42,7 +45,7 @@ public class LoanBrokerFrame extends JFrame {
     private Connection connection;
     private Session session;
     private MessageConsumer consumer;
-    private Destination destination;
+    private MessageProducer producer;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -60,7 +63,7 @@ public class LoanBrokerFrame extends JFrame {
     /**
      * Create the frame.
      */
-    public LoanBrokerFrame() {
+    public LoanBrokerFrame() throws JMSException {
         setTitle("Loan Broker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
@@ -86,7 +89,7 @@ public class LoanBrokerFrame extends JFrame {
         list = new JList<JListLine>(listModel);
         scrollPane.setViewportView(list);
 
-        Listen();
+        Connect();
     }
 
     private JListLine getRequestReply(LoanRequest request) {
@@ -120,66 +123,66 @@ public class LoanBrokerFrame extends JFrame {
             list.repaint();
         }
     }
-    
-    public void Connect() throws JMSException{
+
+    public void SendInterest(LoanRequest loanRequest) throws JMSException {
+        BankInterestRequest bir = new BankInterestRequest();
+        bir.setAmount(loanRequest.getAmount());
+        bir.setTime(loanRequest.getTime());
+
+        ObjectMessage objectMessage = session.createObjectMessage();
+        objectMessage.setObject(bir);
+        producer.send(objectMessage);
+
+        add(loanRequest, bir);
+    }
+
+    public void SendReply(RequestReply requestReply) throws JMSException {
+        //TODO
+    }
+
+    public void Connect() throws JMSException {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-            connectionFactory.setTrustedPackages(Arrays.asList("models"));
-            connection = connectionFactory.createConnection();
-            connection.start();
-            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            destination = session.createQueue("loan");
-            consumer = session.createConsumer(destination);
-    }
-    
-    public void Dissconect() throws JMSException{
-            consumer.close();
-            session.close();
-            connection.close();
+        connectionFactory.setTrustedPackages(Arrays.asList("models"));
+        connection = connectionFactory.createConnection();
+        connection.start();
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        consumer = session.createConsumer(session.createQueue("Loan"));
+        consumer.setMessageListener(this);
+        producer = session.createProducer(session.createQueue("Bank"));
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
     }
 
-    public void Listen() {
+    public void Dissconect() throws JMSException {
+        consumer.close();
+        session.close();
+        connection.close();
+    }
+
+    @Override
+    public void onMessage(Message msg) {
         try {
+            String msgText = msg.toString();
+            System.out.println(msgText);
 
-            Connect();
-            Message message = consumer.receive(1000);
-            if (message instanceof TextMessage) {
-                TextMessage textMessage = (TextMessage) message;
-                String text = textMessage.getText();
-                System.out.println("Received: " + text);
-            } else {
-                System.out.println("Received: " + message);
-            }
-        } catch (Exception e) {
-            System.out.println("Caught: " + e);
-            e.printStackTrace();
-        }
+            if (msg instanceof ObjectMessage) {
 
-        try {
-            consumer.setMessageListener(new MessageListener() {
+                Object o = ((ObjectMessage) msg).getObject();
 
-                @Override
-                public void onMessage(Message msg) {
-                    try {
-                        String msgText = msg.toString();
-                        System.out.println(msgText);
+                if (o instanceof LoanRequest) {
+                    LoanRequest lr = (LoanRequest) o;
+                    SendInterest(lr);
+                    add(lr);
+                }
 
-                        if (msg instanceof ObjectMessage) {
-                            
-                            Object o = ((ObjectMessage) msg).getObject();
-                            
-                            if (o instanceof LoanRequest) {
-                                LoanRequest lr = (models.LoanRequest) o;
-                                add(lr);
-                            }
-                        }
-                    } catch (JMSException ex) {
-                        Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
+                if (o instanceof RequestReply) {
+                    RequestReply rr = (RequestReply) o;
+                    if (rr.getReply() instanceof BankInterestReply) {
+                        SendReply(rr);
                     }
                 }
-            });
-
-        } catch (JMSException e) {
-            e.printStackTrace();
+            }
+        } catch (JMSException ex) {
+            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

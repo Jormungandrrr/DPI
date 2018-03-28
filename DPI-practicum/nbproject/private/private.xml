@@ -5,10 +5,13 @@
         <group>
             <file>file:/D:/Github/DPI/DPI-practicum/src/forms/LoanClientFrame.java</file>
             <file>file:/D:/Github/DPI/DPI-practicum/src/forms/LoanBrokerFrame.java</file>
+            <file>file:/D:/Github/DPI/DPI-practicum/src/models/BankInterestRequest.java</file>
             <file>file:/D:/Github/DPI/DPI-practicum/src/forms/JListLine.java</file>
             <file>file:/D:/Github/DPI/DPI-practicum/src/models/LoanRequest.java</file>
             <file>file:/D:/Github/DPI/DPI-practicum/src/forms/JMSBankFrame.java</file>
             <file>file:/D:/Github/DPI/DPI-practicum/src/models/LoanReply.java</file>
+            <file>file:/D:/Github/DPI/DPI-practicum/src/models/RequestReply.java</file>
+            <file>file:/D:/Github/DPI/DPI-practicum/src/models/BankInterestReply.java</file>
         </group>
     </open-files>
 </project-private>

@@ -125,7 +125,8 @@ public class JMSBankFrame extends JFrame implements MessageListener {
             public void actionPerformed(ActionEvent e) {
                 RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
                 double interest = Double.parseDouble((tfReply.getText()));
-                BankInterestReply reply = new BankInterestReply(interest, "ABN AMRO");
+                LoanRequest lr = rr.getRequest().getLoanRequest();
+                BankInterestReply reply = new BankInterestReply(interest, "ABN AMRO", lr);
                 if (rr != null && reply != null) {
                     rr.setReply(reply);
                     list.repaint();
@@ -150,9 +151,9 @@ public class JMSBankFrame extends JFrame implements MessageListener {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        consumer = session.createConsumer(session.createQueue("Bank"));
+        consumer = session.createConsumer(session.createTopic("Bank"));
         consumer.setMessageListener(this);
-        producer = session.createProducer(session.createQueue("Loan"));
+        producer = session.createProducer(session.createTopic("Bank"));
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
     }
 

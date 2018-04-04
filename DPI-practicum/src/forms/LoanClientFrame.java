@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.Connection;
@@ -14,7 +15,10 @@ import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
 import javax.swing.DefaultListModel;
@@ -31,7 +35,7 @@ import models.LoanReply;
 import models.RequestReply;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-public class LoanClientFrame extends JFrame {
+public class LoanClientFrame extends JFrame implements MessageListener{
 
     /**
      *
@@ -50,6 +54,7 @@ public class LoanClientFrame extends JFrame {
     private Connection connection;
     private Session session;
     private MessageProducer producer;
+    private MessageConsumer consumer;
 
     /**
      * Create the frame.
@@ -198,8 +203,11 @@ public class LoanClientFrame extends JFrame {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        producer = session.createProducer(session.createQueue("Loan"));
+        producer = session.createProducer(session.createTopic("Loan"));
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        consumer = session.createConsumer(session.createTopic("Loan"));
+        consumer.setMessageListener(this);
     }
     
         public void Dissconect() throws JMSException{
@@ -211,5 +219,31 @@ public class LoanClientFrame extends JFrame {
     private void sendRequest(Serializable object) throws JMSException {
         Message msg = session.createObjectMessage(object);
         producer.send(msg);
+    }
+    
+     public void recieveReply(RequestReply rr) {
+        LoanRequest loanRequest = (LoanRequest) rr.getRequest();
+        listModel.removeElement(getRequestReply(loanRequest));
+        listModel.addElement(rr);
+    }
+    
+    @Override
+    public void onMessage(Message msg) {
+        try {
+            String msgText = msg.toString();
+            System.out.println(msgText);
+
+            if (msg instanceof ObjectMessage) {
+
+                Object o = ((ObjectMessage) msg).getObject();
+
+                if (o instanceof LoanReply) {
+                    LoanReply lr = (LoanReply) o;
+                    //recieveReply();
+                }
+            }
+        } catch (JMSException ex) {
+            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

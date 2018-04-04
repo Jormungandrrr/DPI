@@ -29,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 import models.LoanRequest;
 import models.BankInterestReply;
 import models.BankInterestRequest;
+import models.LoanReply;
 import models.RequestReply;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -44,8 +45,10 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
 
     private Connection connection;
     private Session session;
-    private MessageConsumer consumer;
-    private MessageProducer producer;
+    private MessageConsumer loanConsumer;
+    private MessageProducer loanProducer;
+    private MessageConsumer bankConsumer;
+    private MessageProducer bankProducer;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -96,7 +99,7 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
 
         for (int i = 0; i < listModel.getSize(); i++) {
             JListLine rr = listModel.get(i);
-            if (rr.getLoanRequest() == request) {
+            if (rr.getLoanRequest().equals(request)) {
                 return rr;
             }
         }
@@ -128,16 +131,27 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
         BankInterestRequest bir = new BankInterestRequest();
         bir.setAmount(loanRequest.getAmount());
         bir.setTime(loanRequest.getTime());
+        bir.setLoanRequest(loanRequest);
 
         ObjectMessage objectMessage = session.createObjectMessage();
         objectMessage.setObject(bir);
-        producer.send(objectMessage);
+        bankProducer.send(objectMessage);
 
         add(loanRequest, bir);
     }
 
-    public void SendReply(RequestReply requestReply) throws JMSException {
-        //TODO
+    public void SendReply(RequestReply rr) throws JMSException {
+        LoanReply lr = new LoanReply();
+        BankInterestReply bir = (BankInterestReply) rr.getReply();
+        lr.setInterest(bir.getInterest());
+        lr.setQuoteID(bir.getQuoteId());
+        
+        RequestReply rrr = new RequestReply(bir.getLoanRequest(),lr);
+        
+        ObjectMessage objectMessage = session.createObjectMessage();
+        objectMessage.setObject(rrr);
+        loanProducer.send(objectMessage);
+        add(bir.getLoanRequest(),bir);
     }
 
     public void Connect() throws JMSException {
@@ -146,16 +160,21 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        consumer = session.createConsumer(session.createQueue("Loan"));
-        consumer.setMessageListener(this);
-        producer = session.createProducer(session.createQueue("Bank"));
-        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        loanConsumer = session.createConsumer(session.createTopic("Loan"));
+        loanConsumer.setMessageListener(this);
+        loanProducer = session.createProducer(session.createTopic("Loan"));
+        loanProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+        bankProducer = session.createProducer(session.createTopic("Bank"));
+        bankProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        bankConsumer = session.createConsumer(session.createTopic("Bank"));
+        bankConsumer.setMessageListener(this);
     }
 
     public void Dissconect() throws JMSException {
-        consumer.close();
-        session.close();
-        connection.close();
+        //consumer.close();
+        //session.close();
+        //connection.close();
     }
 
     @Override

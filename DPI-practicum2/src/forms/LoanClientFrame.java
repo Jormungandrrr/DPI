@@ -151,8 +151,8 @@ public class LoanClientFrame extends JFrame implements MessageListener{
         requestReplyList = new JList<RequestReply<LoanRequest, LoanReply>>(listModel);
         scrollPane.setViewportView(requestReplyList);
         
-        SendGateway = new MessageSenderGateway("loan");
-        RecieveGateway = new MessageRecieverGateway("loan", this);
+        SendGateway = new MessageSenderGateway("LoanRequest");
+        RecieveGateway = new MessageRecieverGateway("LoanReply", this);
     }
 
     /**

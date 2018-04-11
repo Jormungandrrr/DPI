@@ -82,10 +82,10 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
         list = new JList<JListLine>(listModel);
         scrollPane.setViewportView(list);
         
-         LoanSendGateway = new MessageSenderGateway("loan");
-         LoanRecieveGateway = new MessageRecieverGateway("loan", this);
-         BankSendGateway = new MessageSenderGateway("bank");
-         BankRecieveGateway = new MessageRecieverGateway("bank", this);
+         LoanSendGateway = new MessageSenderGateway("LoanReply");
+         LoanRecieveGateway = new MessageRecieverGateway("LoanRequest", this);
+         BankSendGateway = new MessageSenderGateway("BankRequest");
+         BankRecieveGateway = new MessageRecieverGateway("BankReply", this);
     }
 
     private JListLine getRequestReply(LoanRequest request) {

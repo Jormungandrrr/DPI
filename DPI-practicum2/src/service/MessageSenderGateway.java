@@ -33,7 +33,7 @@ public class MessageSenderGateway {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        producer = session.createProducer(session.createTopic(dest));
+        producer = session.createProducer(session.createQueue(dest));
         producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
     }
 

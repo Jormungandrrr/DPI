@@ -6,20 +6,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -34,7 +26,6 @@ import models.BankInterestReply;
 import models.BankInterestRequest;
 import models.LoanRequest;
 import models.RequestReply;
-import org.apache.activemq.ActiveMQConnectionFactory;
 import service.MessageRecieverGateway;
 import service.MessageSenderGateway;
 
@@ -139,8 +130,8 @@ public class JMSBankFrame extends JFrame implements MessageListener {
         gbc_btnSendReply.gridy = 1;
         contentPane.add(btnSendReply, gbc_btnSendReply);
         
-        SendGateway = new MessageSenderGateway("bank");
-        RecieveGateway = new MessageRecieverGateway("bank", this);
+        SendGateway = new MessageSenderGateway("BankReply");
+        RecieveGateway = new MessageRecieverGateway("BankRequest", this);
     }
 
     public void sendReply(RequestReply rr) throws JMSException {

@@ -32,7 +32,7 @@ public class MessageRecieverGateway {
         connection = connectionFactory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        consumer = session.createConsumer(session.createTopic(dest));
+        consumer = session.createConsumer(session.createQueue(dest));
         consumer.setMessageListener(ml);
     }
 }

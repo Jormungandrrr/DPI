@@ -8,11 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -26,10 +21,9 @@ import models.BankInterestReply;
 import models.BankInterestRequest;
 import models.LoanRequest;
 import models.RequestReply;
-import service.MessageRecieverGateway;
-import service.MessageSenderGateway;
+import service.BankAppGateway;
 
-public class JMSBankFrame extends JFrame implements MessageListener {
+public class JMSBankFrame extends JFrame{
 
     /**
      *
@@ -37,11 +31,9 @@ public class JMSBankFrame extends JFrame implements MessageListener {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JTextField tfReply;
-    private DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
+    public DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
 
-    
-    private MessageSenderGateway SendGateway;
-    private MessageRecieverGateway RecieveGateway;
+    private BankAppGateway BankGateway;
     
     /**
      * Launch the application.
@@ -62,7 +54,7 @@ public class JMSBankFrame extends JFrame implements MessageListener {
     /**
      * Create the frame.
      */
-    public JMSBankFrame() throws JMSException {
+    public JMSBankFrame(){
         setTitle("JMS Bank - ABN AMRO");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
@@ -117,11 +109,7 @@ public class JMSBankFrame extends JFrame implements MessageListener {
                     rr.setReply(reply);
                     list.repaint();
                 }
-                try {
-                    sendReply(rr);
-                } catch (JMSException ex) {
-                    Logger.getLogger(JMSBankFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                BankGateway.sendReply(rr);
             }
         });
         GridBagConstraints gbc_btnSendReply = new GridBagConstraints();
@@ -129,32 +117,6 @@ public class JMSBankFrame extends JFrame implements MessageListener {
         gbc_btnSendReply.gridx = 4;
         gbc_btnSendReply.gridy = 1;
         contentPane.add(btnSendReply, gbc_btnSendReply);
-        
-        SendGateway = new MessageSenderGateway("BankReply");
-        RecieveGateway = new MessageRecieverGateway("BankRequest", this);
-    }
-
-    public void sendReply(RequestReply rr) throws JMSException {
-        SendGateway.sendmessage(rr);
-    }
-
-    @Override
-    public void onMessage(Message msg) {
-        try {
-            String msgText = msg.toString();
-            System.out.println(msgText);
-
-            if (msg instanceof ObjectMessage) {
-
-                Object o = ((ObjectMessage) msg).getObject();
-
-                if (o instanceof BankInterestRequest) {
-                    BankInterestRequest bir = (BankInterestRequest) o;
-                    listModel.addElement(new RequestReply(bir, null));
-                }
-            }
-        } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        BankGateway = new BankAppGateway(this);
     }
 }

@@ -4,13 +4,6 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -20,12 +13,9 @@ import javax.swing.border.EmptyBorder;
 import models.LoanRequest;
 import models.BankInterestReply;
 import models.BankInterestRequest;
-import models.LoanReply;
-import models.RequestReply;
-import service.MessageRecieverGateway;
-import service.MessageSenderGateway;
+import service.LoanBrokerAppGateway;
 
-public class LoanBrokerFrame extends JFrame implements MessageListener {
+public class LoanBrokerFrame extends JFrame {
 
     /**
      *
@@ -34,11 +24,7 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
     private JPanel contentPane;
     private DefaultListModel<JListLine> listModel = new DefaultListModel<JListLine>();
     private JList<JListLine> list;
-    
-    private MessageSenderGateway LoanSendGateway;
-    private MessageRecieverGateway LoanRecieveGateway;
-    private MessageSenderGateway BankSendGateway;
-    private MessageRecieverGateway BankRecieveGateway;
+    private LoanBrokerAppGateway brokerGateway;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -56,7 +42,7 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
     /**
      * Create the frame.
      */
-    public LoanBrokerFrame() throws JMSException {
+    public LoanBrokerFrame() {
         setTitle("Loan Broker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
@@ -81,11 +67,8 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
 
         list = new JList<JListLine>(listModel);
         scrollPane.setViewportView(list);
-        
-         LoanSendGateway = new MessageSenderGateway("LoanReply");
-         LoanRecieveGateway = new MessageRecieverGateway("LoanRequest", this);
-         BankSendGateway = new MessageSenderGateway("BankRequest");
-         BankRecieveGateway = new MessageRecieverGateway("BankReply", this);
+
+        brokerGateway = new LoanBrokerAppGateway(this);
     }
 
     private JListLine getRequestReply(LoanRequest request) {
@@ -117,53 +100,6 @@ public class LoanBrokerFrame extends JFrame implements MessageListener {
         if (rr != null && bankReply != null) {
             rr.setBankReply(bankReply);;
             list.repaint();
-        }
-    }
-
-    public void SendInterest(LoanRequest loanRequest) throws JMSException {
-        BankInterestRequest bir = new BankInterestRequest();
-        bir.setAmount(loanRequest.getAmount());
-        bir.setTime(loanRequest.getTime());
-        bir.setLoanRequest(loanRequest);
-        BankSendGateway.sendmessage(bir);
-        add(loanRequest, bir);
-    }
-
-    public void SendReply(RequestReply rr) throws JMSException {
-        LoanReply lr = new LoanReply();
-        BankInterestReply bir = (BankInterestReply) rr.getReply();
-        lr.setInterest(bir.getInterest());
-        lr.setQuoteID(bir.getQuoteId());
-        RequestReply rrr = new RequestReply(bir.getLoanRequest(),lr);
-        LoanSendGateway.sendmessage(rrr);
-        add(bir.getLoanRequest(),bir);
-    }
-
-    @Override
-    public void onMessage(Message msg) {
-        try {
-            String msgText = msg.toString();
-            System.out.println(msgText);
-
-            if (msg instanceof ObjectMessage) {
-
-                Object o = ((ObjectMessage) msg).getObject();
-
-                if (o instanceof LoanRequest) {
-                    LoanRequest lr = (LoanRequest) o;
-                    SendInterest(lr);
-                    add(lr);
-                }
-
-                if (o instanceof RequestReply) {
-                    RequestReply rr = (RequestReply) o;
-                    if (rr.getReply() instanceof BankInterestReply) {
-                        SendReply(rr);
-                    }
-                }
-            }
-        } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

@@ -235,9 +235,9 @@ public class LoanClientFrame extends JFrame implements MessageListener{
 
                 Object o = ((ObjectMessage) msg).getObject();
 
-                if (o instanceof LoanReply) {
-                    LoanReply lr = (LoanReply) o;
-                    //recieveReply();
+                if (o instanceof RequestReply) {
+                    RequestReply rr = (RequestReply) o;
+                    recieveReply(rr);
                 }
             }
         } catch (JMSException ex) {

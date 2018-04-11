@@ -6,14 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -26,10 +18,9 @@ import javax.swing.border.EmptyBorder;
 import models.LoanRequest;
 import models.LoanReply;
 import models.RequestReply;
-import service.MessageRecieverGateway;
-import service.MessageSenderGateway;
+import service.LoanClientAppGateway;
 
-public class LoanClientFrame extends JFrame implements MessageListener{
+public class LoanClientFrame extends JFrame{
 
     /**
      *
@@ -45,13 +36,12 @@ public class LoanClientFrame extends JFrame implements MessageListener{
     private JLabel lblNewLabel_1;
     private JTextField tfTime;
     
-    private MessageSenderGateway SendGateway;
-    private MessageRecieverGateway RecieveGateway;
+    private LoanClientAppGateway clientGateway;
 
     /**
      * Create the frame.
      */
-    public LoanClientFrame() throws JMSException {
+    public LoanClientFrame(){
         setTitle("Loan Client");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -126,11 +116,7 @@ public class LoanClientFrame extends JFrame implements MessageListener{
 
                 LoanRequest request = new LoanRequest(ssn, amount, time);
                 listModel.addElement(new RequestReply<LoanRequest, LoanReply>(request, null));
-                try {
-                    sendRequest(request);
-                } catch (JMSException ex) {
-                    Logger.getLogger(LoanClientFrame.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                clientGateway.sendRequest(request);
             }
         });
         GridBagConstraints gbc_btnQueue = new GridBagConstraints();
@@ -150,9 +136,7 @@ public class LoanClientFrame extends JFrame implements MessageListener{
 
         requestReplyList = new JList<RequestReply<LoanRequest, LoanReply>>(listModel);
         scrollPane.setViewportView(requestReplyList);
-        
-        SendGateway = new MessageSenderGateway("LoanRequest");
-        RecieveGateway = new MessageRecieverGateway("LoanReply", this);
+        clientGateway = new LoanClientAppGateway(this);
     }
 
     /**
@@ -189,34 +173,10 @@ public class LoanClientFrame extends JFrame implements MessageListener{
             }
         });
     }
-
-    private void sendRequest(Serializable object) throws JMSException {
-        SendGateway.sendmessage(object);
-    }
     
      public void recieveReply(RequestReply rr) {
         LoanRequest loanRequest = (LoanRequest) rr.getRequest();
         listModel.removeElement(getRequestReply(loanRequest));
         listModel.addElement(rr);
-    }
-    
-    @Override
-    public void onMessage(Message msg) {
-        try {
-            String msgText = msg.toString();
-            System.out.println(msgText);
-
-            if (msg instanceof ObjectMessage) {
-
-                Object o = ((ObjectMessage) msg).getObject();
-
-                if (o instanceof RequestReply) {
-                    RequestReply rr = (RequestReply) o;
-                    recieveReply(rr);
-                }
-            }
-        } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

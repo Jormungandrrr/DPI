@@ -5,7 +5,7 @@
  */
 package service;
 
-import forms.LoanBrokerFrame;
+import forms.BrokerFrame;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,28 +18,23 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-import models.BankInterestReply;
-import models.BankInterestRequest;
-import models.LoanReply;
-import models.LoanRequest;
-import models.RequestReply;
 
 /**
  *
  * @author Jorrit
  */
-public class LoanBrokerAppGateway implements MessageListener {
+public class BrokerGateway implements MessageListener {
 
     MessageSenderGateway clientSender;
     MessageRecieverGateway clientReciever;
     MessageSenderGateway bankSender;
     MessageRecieverGateway bankReciever;
 
-    private LoanBrokerFrame frame;
+    private BrokerFrame frame;
     int amountOfBanks = 4;
     private HashMap<UUID, List<BankInterestReply>> messages = new HashMap<UUID, List<BankInterestReply>>();
 
-    public LoanBrokerAppGateway(LoanBrokerFrame f) {
+    public BrokerGateway(BrokerFrame f) {
         try {
             this.clientSender = new MessageSenderGateway("LoanReply", false);
             this.clientReciever = new MessageRecieverGateway("LoanRequest", this, false);
@@ -47,7 +42,7 @@ public class LoanBrokerAppGateway implements MessageListener {
             this.bankReciever = new MessageRecieverGateway("BankReply", this, false);
             this.frame = f;
         } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerAppGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -60,7 +55,7 @@ public class LoanBrokerAppGateway implements MessageListener {
             bankSender.sendmessage(bir);
             frame.add(loanRequest, bir);
         } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerAppGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -73,7 +68,7 @@ public class LoanBrokerAppGateway implements MessageListener {
             clientSender.sendmessage(rrr);
             frame.add(bir.getLoanRequest(), bir);
         } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerAppGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -117,7 +112,7 @@ public class LoanBrokerAppGateway implements MessageListener {
                 }
             }
         } catch (JMSException ex) {
-            Logger.getLogger(LoanBrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BrokerFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

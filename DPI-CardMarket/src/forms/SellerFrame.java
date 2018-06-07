@@ -6,8 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -17,13 +15,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import models.BankInterestReply;
-import models.BankInterestRequest;
-import models.LoanRequest;
-import models.RequestReply;
-import service.BankAppGateway;
+import models.Auction;
+import models.Seller;
+import service.SellerGateway;
 
-public class BankFrame extends JFrame {
+/**
+ *
+ * @author Jorrit
+ */
+
+public class SellerFrame extends JFrame {
 
     /**
      *
@@ -31,9 +32,9 @@ public class BankFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JTextField tfReply;
-    public DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>> listModel = new DefaultListModel<RequestReply<BankInterestRequest, BankInterestReply>>();
+    public DefaultListModel<Auction> listModel = new DefaultListModel<Auction>();
     public String name;
-    private BankAppGateway BankGateway;
+    private SellerGateway BankGateway;
 
     /**
      * Launch the application.
@@ -42,14 +43,8 @@ public class BankFrame extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    BankFrame ABNframe = new BankFrame("ABN", 200000, 300000, 20);
-                    BankFrame INGframe = new BankFrame("ING", 0, 100000, 10);
-                    BankFrame RABOframe = new BankFrame("RABO", 0, 250000, 15);
-                     BankFrame testframe = new BankFrame("test", 0, 250000, 15);
-                     testframe.setVisible(true);
-                    ABNframe.setVisible(true);
-                    INGframe.setVisible(true);
-                    RABOframe.setVisible(true);
+                    SellerFrame sf1 = new SellerFrame(new Seller("Henk"));
+                    sf1.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -60,9 +55,10 @@ public class BankFrame extends JFrame {
     /**
      * Create the frame.
      */
-    public BankFrame(String bank, int min, int max, int time) {
-        this.name = bank;
-        setTitle(bank);
+    public SellerFrame(Seller s) {
+        this.name = s.name;
+        this.listModel.
+        setTitle(s.name);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
         contentPane = new JPanel();
@@ -84,7 +80,7 @@ public class BankFrame extends JFrame {
         gbc_scrollPane.gridy = 0;
         contentPane.add(scrollPane, gbc_scrollPane);
 
-        JList<RequestReply<BankInterestRequest, BankInterestReply>> list = new JList<RequestReply<BankInterestRequest, BankInterestReply>>(listModel);
+        JList<Auction> list = new JList<Auction>(listModel);
         scrollPane.setViewportView(list);
 
         JLabel lblNewLabel = new JLabel("type reply");
@@ -111,7 +107,7 @@ public class BankFrame extends JFrame {
                 RequestReply<BankInterestRequest, BankInterestReply> rr = list.getSelectedValue();
                 double interest = Double.parseDouble((tfReply.getText()));
                 LoanRequest lr = rr.getRequest().getLoanRequest();
-                BankInterestReply reply = new BankInterestReply(interest, bank, lr);
+                BankInterestReply reply = new BankInterestReply(interest, name, lr);
                 if (rr != null && reply != null) {
                     rr.setReply(reply);
                     list.repaint();
@@ -124,6 +120,6 @@ public class BankFrame extends JFrame {
         gbc_btnSendReply.gridx = 4;
         gbc_btnSendReply.gridy = 1;
         contentPane.add(btnSendReply, gbc_btnSendReply);
-        BankGateway = new BankAppGateway(this, min, max, time);
+        BankGateway = new SellerGateway(this, min, max, time);
     }
 }

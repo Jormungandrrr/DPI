@@ -104,7 +104,7 @@ public class BidderFrame extends JFrame {
         });
         timer.start();
 
-        JLabel lblNewLabel = new JLabel("type reply");
+        JLabel lblNewLabel = new JLabel("type bid:");
         GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
         gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);

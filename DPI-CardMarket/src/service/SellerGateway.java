@@ -57,8 +57,12 @@ public class SellerGateway implements MessageListener {
                 Object o = ((ObjectMessage) msg).getObject();
 
                 if (o instanceof Sale) {
-                    Sale a = (Sale) o;
-                    frame.addSale(a);
+                    Sale s = (Sale) o;
+                    if (frame.seller.getUUID().equals(s.getSeller().getUUID())) {
+                         frame.addSale(s);
+                    }
+                   
+                   
                 }
             }
         } catch (JMSException ex) {

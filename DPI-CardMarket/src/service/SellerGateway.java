@@ -16,6 +16,7 @@ import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import models.Auction;
 import models.Bid;
+import models.Sale;
 
 /**
  *
@@ -55,8 +56,9 @@ public class SellerGateway implements MessageListener {
 
                 Object o = ((ObjectMessage) msg).getObject();
 
-                if (o instanceof Bid) {
-                    Bid b = (Bid) o;
+                if (o instanceof Sale) {
+                    Sale a = (Sale) o;
+                    frame.addSale(a);
                 }
             }
         } catch (JMSException ex) {

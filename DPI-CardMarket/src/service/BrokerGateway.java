@@ -20,6 +20,7 @@ import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import models.Auction;
 import models.Bid;
+import models.Sale;
 
 /**
  *
@@ -60,7 +61,13 @@ public class BrokerGateway implements MessageListener {
      public void EndAuction(Auction a) {
         try {
             auctions.remove(a.getUuid());
-            AuctionSender.sendmessage(a);
+            Bid highestBid = new Bid(-1);
+            for (Bid b : a.bids) {
+                if (b.amount > highestBid.amount) {
+                    highestBid = b;
+                }
+            }
+            AuctionSender.sendmessage(new Sale(a.seller,highestBid.bidder,a.card,highestBid.amount));
         } catch (JMSException ex) {
             Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -73,6 +74,7 @@ public class BrokerFrame extends JFrame {
         Timer timer = new Timer(1000, new ActionListener(){
             public void actionPerformed(ActionEvent e) {
                 list.repaint();
+                checkAuctionTime();
             }
         });
         timer.start();
@@ -94,6 +96,17 @@ public class BrokerFrame extends JFrame {
             Auction auction = auctionList.get(i);
             if (auction.getUuid().equals(a.getUuid())) {
                 auction = a;
+            }
+        }
+        list.repaint();
+    }
+    
+    public void checkAuctionTime(){
+        for (int i = 0; i < auctionList.getSize(); i++) {
+            Auction auction = auctionList.get(i);
+            if (auction.getEnd() < new Date().getTime()) {
+                brokerGateway.EndAuction(auction);
+                 auctionList.remove(i);
             }
         }
         list.repaint();

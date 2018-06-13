@@ -30,7 +30,7 @@ public class SellerGateway implements MessageListener {
     public SellerGateway(SellerFrame f) {
         try {
             this.sender = new MessageSenderGateway("AuctionRequest", false);
-            this.reciever = new MessageRecieverGateway("AuctionReply", this, true);
+            this.reciever = new MessageRecieverGateway("AuctionReply", this, false);
             this.frame = f;
         } catch (JMSException ex) {
             Logger.getLogger(SellerGateway.class.getName()).log(Level.SEVERE, null, ex);

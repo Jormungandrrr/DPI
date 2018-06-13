@@ -37,9 +37,9 @@ public class BrokerGateway implements MessageListener {
 
     public BrokerGateway(BrokerFrame f) {
         try {
-            this.clientSender = new MessageSenderGateway("AuctionBidding", false);
+            this.clientSender = new MessageSenderGateway("AuctionBidding", true);
             this.clientReciever = new MessageRecieverGateway("BiddingRequest", this, false);
-            this.AuctionSender = new MessageSenderGateway("AuctionReply", true);
+            this.AuctionSender = new MessageSenderGateway("AuctionReply", false);
             this.AuctionReciever = new MessageRecieverGateway("AuctionRequest", this, false);
             this.frame = f;
         } catch (JMSException ex) {
@@ -52,6 +52,15 @@ public class BrokerGateway implements MessageListener {
             auctions.put(a.getUuid(), a);
             clientSender.sendmessage(a);
             frame.add(a);
+        } catch (JMSException ex) {
+            Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+     public void EndAuction(Auction a) {
+        try {
+            auctions.remove(a.getUuid());
+            AuctionSender.sendmessage(a);
         } catch (JMSException ex) {
             Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -96,10 +105,10 @@ public class BrokerGateway implements MessageListener {
                             auctions.remove(b.getAuction());
                             a.bids.add(b);
                             a.price = b.amount;
-                            auctions.put(b.uuid, a);
+                            auctions.put(a.getUuid(), a);
                             frame.updateAuction(a);
+                            clientSender.sendmessage(a);
                         }
-                      
                     }
                 }
             }

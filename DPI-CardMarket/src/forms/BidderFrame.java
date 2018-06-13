@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -46,8 +47,10 @@ public class BidderFrame extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    BidderFrame sf1 = new BidderFrame(new Bidder("Henk"));
-                    sf1.setVisible(true);
+                    BidderFrame bf1 = new BidderFrame(new Bidder("Henk"));
+                    BidderFrame bf2 = new BidderFrame(new Bidder("Klaas"));
+                    bf1.setVisible(true);
+                    bf2.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -88,6 +91,7 @@ public class BidderFrame extends JFrame {
         Timer timer = new Timer(1000, new ActionListener(){
             public void actionPerformed(ActionEvent e) {
                 list.repaint();
+                checkAuctionTime();
             }
         });
         timer.start();
@@ -124,5 +128,30 @@ public class BidderFrame extends JFrame {
         gbc_btncreateBid.gridy = 1;
         contentPane.add(btncreateBid, gbc_btncreateBid);
         BidGateway = new BidderGateway(this);
+    }
+    
+    public void checkAuctionTime(){
+        for (int i = 0; i < auctionList.getSize(); i++) {
+            Auction auction = auctionList.get(i);
+            if (auction.getEnd() < new Date().getTime()) {
+                 auctionList.remove(i);
+            }
+        }
+    }
+    
+    public void updateOrAddAuction(Auction a) {
+        boolean newAuction = true;
+        for (int i = 0; i < auctionList.getSize(); i++) {
+            Auction auction = auctionList.get(i);
+            if (auction.getUuid().equals(a.getUuid())) {
+                auctionList.remove(i);
+                auction = a;
+                auctionList.addElement(a);
+                newAuction = false;
+            }
+        }
+        if (newAuction) {
+            auctionList.addElement(a);
+        }
     }
 }

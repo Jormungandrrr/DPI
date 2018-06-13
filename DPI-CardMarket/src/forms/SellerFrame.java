@@ -129,7 +129,7 @@ public class SellerFrame extends JFrame {
                 String cardname = tfCard.getText();
                 int amount = Integer.parseInt(tfAmount.getText());
                 Instant timestamp = Instant.now();
-                timestamp = timestamp.plus(Integer.parseInt(tfTime.getText()), ChronoUnit.HOURS);
+                timestamp = timestamp.plus(Integer.parseInt(tfTime.getText()), ChronoUnit.SECONDS);
                 Card cardToAuction = new Card(cardname, "test", "test", "test");
                 Auction newAuction = new Auction(cardToAuction, timestamp.toEpochMilli(), amount, s);
                 auctionList.addElement(newAuction);

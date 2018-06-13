@@ -57,7 +57,9 @@ public class BidderGateway implements MessageListener {
 
                 if (o instanceof Auction) {
                     Auction a = (Auction) o;
-                    frame.updateOrAddAuction(a);
+                    if (a.card.color != null && frame.bidder.getColors().contains(a.card.color) || a.card.color.equals("")) {
+                        frame.updateOrAddAuction(a);
+                    }             
                 }
             }
         } catch (JMSException ex) {

@@ -57,34 +57,23 @@ public class BrokerGateway implements MessageListener {
             Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-     public void EndAuction(Auction a) {
+
+    public void EndAuction(Auction a) {
         try {
             auctions.remove(a.getUuid());
-            Bid highestBid = new Bid(-1);
-            for (Bid b : a.bids) {
-                if (b.amount > highestBid.amount) {
-                    highestBid = b;
+            if (a.bids.size() > 0) {
+                Bid highestBid = new Bid(-1);
+                for (Bid b : a.bids) {
+                    if (b.amount > highestBid.amount) {
+                        highestBid = b;
+                    }
                 }
+                AuctionSender.sendmessage(new Sale(a.seller, highestBid.bidder, a.card, highestBid.amount));
             }
-            AuctionSender.sendmessage(new Sale(a.seller,highestBid.bidder,a.card,highestBid.amount));
         } catch (JMSException ex) {
             Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-//
-//    public void SendReply(BankInterestReply bir) {
-//        try {
-//            LoanReply lr = new LoanReply();
-//            lr.setInterest(bir.getInterest());
-//            lr.setQuoteID(bir.getQuoteId());
-//            RequestReply rrr = new RequestReply(bir.getLoanRequest(), lr);
-//            clientSender.sendmessage(rrr);
-//            frame.add(bir.getLoanRequest(), bir);
-//        } catch (JMSException ex) {
-//            Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
 
     @Override
     public void onMessage(Message msg) {
@@ -98,16 +87,13 @@ public class BrokerGateway implements MessageListener {
 
                 if (o instanceof Auction) {
                     Auction a = (Auction) o;
-                     if (!auctions.containsKey(a.getUuid())) 
-                     { 
-                         HandleNewAuction(a);  
-                     }
-                }
-                
-                else if (o instanceof Bid) {
+                    if (!auctions.containsKey(a.getUuid())) {
+                        HandleNewAuction(a);
+                    }
+                } else if (o instanceof Bid) {
                     Bid b = (Bid) o;
                     if (auctions.containsKey(b.getAuction())) {
-                        Auction a =  auctions.get(b.getAuction());
+                        Auction a = auctions.get(b.getAuction());
                         if (a.price < b.amount) {
                             auctions.remove(b.getAuction());
                             a.bids.add(b);

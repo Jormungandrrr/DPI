@@ -6,6 +6,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -39,6 +41,7 @@ public class BidderFrame extends JFrame {
     public DefaultListModel<Auction> auctionList = new DefaultListModel<Auction>();
     public String name;
     private BidderGateway BidGateway;
+    public Bidder bidder;
 
     /**
      * Launch the application.
@@ -47,8 +50,12 @@ public class BidderFrame extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    BidderFrame bf1 = new BidderFrame(new Bidder("Henk"));
-                    BidderFrame bf2 = new BidderFrame(new Bidder("Klaas"));
+                    Bidder bidderOne = new Bidder("Henk");                
+                    bidderOne.setColors( new ArrayList<>(Arrays.asList("blue", "black")));
+                    Bidder bidderTwo = new Bidder("Klaas");
+                    bidderTwo.setColors( new ArrayList<>(Arrays.asList("white", "green")));
+                    BidderFrame bf1 = new BidderFrame(bidderOne);
+                    BidderFrame bf2 = new BidderFrame(bidderTwo);
                     bf1.setVisible(true);
                     bf2.setVisible(true);
                 } catch (Exception e) {
@@ -62,8 +69,9 @@ public class BidderFrame extends JFrame {
      * Create the frame.
      */
     public BidderFrame(Bidder b) {
-        this.name = b.name;
-        setTitle(b.name);
+        this.bidder = b;
+        this.name = bidder.name;
+        setTitle(bidder.name);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
         contentPane = new JPanel();
@@ -88,7 +96,7 @@ public class BidderFrame extends JFrame {
         JList<Auction> list = new JList<Auction>(auctionList);
         scrollPane.setViewportView(list);
 
-        Timer timer = new Timer(1000, new ActionListener(){
+        Timer timer = new Timer(1000, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 list.repaint();
                 checkAuctionTime();
@@ -129,16 +137,16 @@ public class BidderFrame extends JFrame {
         contentPane.add(btncreateBid, gbc_btncreateBid);
         BidGateway = new BidderGateway(this);
     }
-    
-    public void checkAuctionTime(){
+
+    public void checkAuctionTime() {
         for (int i = 0; i < auctionList.getSize(); i++) {
             Auction auction = auctionList.get(i);
             if (auction.getEnd() < new Date().getTime()) {
-                 auctionList.remove(i);
+                auctionList.remove(i);
             }
         }
     }
-    
+
     public void updateOrAddAuction(Auction a) {
         boolean newAuction = true;
         for (int i = 0; i < auctionList.getSize(); i++) {

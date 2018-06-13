@@ -16,6 +16,7 @@ import java.util.UUID;
 public class Bidder implements Serializable {
     public UUID uuid;
     public String name;
+    public ArrayList<String> colors;
 
     public Bidder(String name) {
         this.uuid = UUID.randomUUID();
@@ -33,4 +34,14 @@ public class Bidder implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    public ArrayList<String> getColors() {
+        return colors;
+    }
+    
+    public void setColors(ArrayList<String> colors) {
+        this.colors = colors;
+    }
+    
+    
 }

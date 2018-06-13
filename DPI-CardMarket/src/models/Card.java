@@ -5,27 +5,26 @@
  */
 package models;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  *
  * @author Jorrit
  */
-public class Card {
+public class Card implements Serializable {
     public UUID uuid;
     public String name;
     public String color;
     public String type;
     public String cmc;
-    public Seller owner;
 
-    public Card(String name, String color, String type, String cmc, Seller owner) {
+    public Card(String name, String color, String type, String cmc) {
         this.uuid = UUID.randomUUID();
         this.name = name;
         this.color = color;
         this.type = type;
         this.cmc = cmc;
-        this.owner = owner;
     }
 
     public UUID getUuid() {
@@ -63,14 +62,4 @@ public class Card {
     public void setCmc(String cmc) {
         this.cmc = cmc;
     }
-
-    public Seller getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Seller owner) {
-        this.owner = owner;
-    }
-    
-    
 }

@@ -4,19 +4,22 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
+import models.Auction;
 import service.BrokerGateway;
 
 /**
  *
  * @author Jorrit
  */
-
 public class BrokerFrame extends JFrame {
 
     /**
@@ -24,8 +27,8 @@ public class BrokerFrame extends JFrame {
      */
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
-    private DefaultListModel<JListLine> listModel = new DefaultListModel<JListLine>();
-    private JList<JListLine> list;
+    private DefaultListModel<Auction> auctionList = new DefaultListModel<Auction>();
+    private JList<Auction> list;
     private BrokerGateway brokerGateway;
 
     public static void main(String[] args) {
@@ -45,7 +48,7 @@ public class BrokerFrame extends JFrame {
      * Create the frame.
      */
     public BrokerFrame() {
-        setTitle("Loan Broker");
+        setTitle("CardBroker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
         contentPane = new JPanel();
@@ -66,42 +69,33 @@ public class BrokerFrame extends JFrame {
         gbc_scrollPane.gridx = 0;
         gbc_scrollPane.gridy = 0;
         contentPane.add(scrollPane, gbc_scrollPane);
+        
+        Timer timer = new Timer(1000, new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                list.repaint();
+            }
+        });
+        timer.start();
 
-        list = new JList<JListLine>(listModel);
+        list = new JList<Auction>(auctionList);
         scrollPane.setViewportView(list);
 
         brokerGateway = new BrokerGateway(this);
     }
 
-    private JListLine getRequestReply(LoanRequest request) {
+    public void add(Auction a) {
+        auctionList.addElement(a);
+        list.repaint();
+    }
 
-        for (int i = 0; i < listModel.getSize(); i++) {
-            JListLine rr = listModel.get(i);
-            if (rr.getLoanRequest().equals(request)) {
-                return rr;
+    public void updateAuction(Auction a) {
+
+        for (int i = 0; i < auctionList.getSize(); i++) {
+            Auction auction = auctionList.get(i);
+            if (auction.getUuid().equals(a.getUuid())) {
+                auction = a;
             }
         }
-
-        return null;
-    }
-
-    public void add(LoanRequest loanRequest) {
-        listModel.addElement(new JListLine(loanRequest));
-    }
-
-    public void add(LoanRequest loanRequest, BankInterestRequest bankRequest) {
-        JListLine rr = getRequestReply(loanRequest);
-        if (rr != null && bankRequest != null) {
-            rr.setBankRequest(bankRequest);
-            list.repaint();
-        }
-    }
-
-    public void add(LoanRequest loanRequest, BankInterestReply bankReply) {
-        JListLine rr = getRequestReply(loanRequest);
-        if (rr != null && bankReply != null) {
-            rr.setBankReply(bankReply);;
-            list.repaint();
-        }
+        list.repaint();
     }
 }

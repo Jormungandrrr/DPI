@@ -5,6 +5,7 @@
  */
 package models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -12,11 +13,11 @@ import java.util.UUID;
  *
  * @author Jorrit
  */
-public class Buyer {
+public class Bidder implements Serializable {
     public UUID uuid;
     public String name;
 
-    public Buyer(String name) {
+    public Bidder(String name) {
         this.uuid = UUID.randomUUID();
         this.name = name;
     }

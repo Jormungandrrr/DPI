@@ -5,8 +5,9 @@
  */
 package service;
 
+import forms.BidderFrame;
 import forms.BrokerFrame;
-import forms.ClientFrame;
+import forms.SellerFrame;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,31 +15,32 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import models.Auction;
 
 /**
  *
  * @author Jorrit
  */
-public class ClientGateway implements MessageListener{
+public class BidderGateway implements MessageListener{
     MessageSenderGateway sender;
     MessageRecieverGateway reciever;
-    private ClientFrame frame;
+    private BidderFrame frame;
 
-    public ClientGateway(ClientFrame f){
+    public BidderGateway(BidderFrame f){
         try {
-            this.sender = new MessageSenderGateway("LoanRequest", false);
-            this.reciever = new MessageRecieverGateway("LoanReply", this, false);
+            this.sender = new MessageSenderGateway("BiddingRequest", false);
+            this.reciever = new MessageRecieverGateway("AuctionBidding", this, false);
             this.frame = f;
         } catch (JMSException ex) {
-            Logger.getLogger(ClientGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BidderGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void sendRequest(Serializable object){
+    public void makeBid(Serializable object){
         try {
             sender.sendmessage(object);
         } catch (JMSException ex) {
-            Logger.getLogger(ClientGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BidderGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -52,9 +54,9 @@ public class ClientGateway implements MessageListener{
 
                 Object o = ((ObjectMessage) msg).getObject();
 
-                if (o instanceof RequestReply) {
-                    RequestReply rr = (RequestReply) o;
-                    frame.recieveReply(rr);
+                if (o instanceof Auction) {
+                    Auction a = (Auction) o;
+                    frame.auctionList.addElement(a);
                 }
             }
         } catch (JMSException ex) {

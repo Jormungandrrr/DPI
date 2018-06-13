@@ -5,14 +5,10 @@
  */
 package service;
 
-import java.util.Arrays;
 import javax.jms.Connection;
-import javax.jms.DeliveryMode;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 

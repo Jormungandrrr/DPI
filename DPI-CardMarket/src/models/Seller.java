@@ -5,6 +5,7 @@
  */
 package models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
  *
  * @author Jorrit
  */
-public class Seller {
+public class Seller implements Serializable {
     
     public UUID uuid;
     public String name;

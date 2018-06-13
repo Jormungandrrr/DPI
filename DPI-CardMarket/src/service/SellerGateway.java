@@ -5,14 +5,17 @@
  */
 package service;
 
-import forms.SellerFrame;
+import forms.BidderFrame;
 import forms.BrokerFrame;
+import forms.SellerFrame;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import models.Auction;
+import models.Bid;
 
 /**
  *
@@ -23,26 +26,20 @@ public class SellerGateway implements MessageListener {
     MessageSenderGateway sender;
     MessageRecieverGateway reciever;
     private SellerFrame frame;
-    private int min;
-    private int max;
-    private int time;
 
-    public SellerGateway(SellerFrame f, int min, int max, int time) {
+    public SellerGateway(SellerFrame f) {
         try {
-            this.sender = new MessageSenderGateway("BankReply", false);
-            this.reciever = new MessageRecieverGateway("BankRequest", this, true);
+            this.sender = new MessageSenderGateway("AuctionRequest", false);
+            this.reciever = new MessageRecieverGateway("AuctionReply", this, true);
             this.frame = f;
-            this.min = min;
-            this.max = max;
-            this.time = time;
         } catch (JMSException ex) {
             Logger.getLogger(SellerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void sendReply(RequestReply rr) {
+    public void createAuction(Auction a) {
         try {
-            this.sender.sendmessage(rr);
+            this.sender.sendmessage(a);
         } catch (JMSException ex) {
             Logger.getLogger(SellerGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -58,14 +55,8 @@ public class SellerGateway implements MessageListener {
 
                 Object o = ((ObjectMessage) msg).getObject();
 
-                if (o instanceof BankInterestRequest) {
-                    BankInterestRequest bir = (BankInterestRequest) o;
-                    if (bir.getAmount() >= min && bir.getAmount() <= max && bir.getTime() <= time) {
-                         frame.listModel.addElement(new RequestReply(bir, null));
-                    }
-                    else {
-                         this.sender.sendmessage(new RequestReply(bir, new BankInterestReply(999999999,frame.name,bir.loanRequest)));
-                    }
+                if (o instanceof Bid) {
+                    Bid b = (Bid) o;
                 }
             }
         } catch (JMSException ex) {

@@ -5,20 +5,21 @@
  */
 package models;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  *
  * @author Jorrit
  */
-public class Sale {
+public class Sale implements Serializable {
     
     public UUID uuid;
     public Seller seller;
-    public Buyer buyer;
+    public Bidder buyer;
     public double amount;
 
-    public Sale(Seller seller, Buyer buyer, double amount) {
+    public Sale(Seller seller, Bidder buyer, double amount) {
         this.uuid = UUID.randomUUID();
         this.seller = seller;
         this.buyer = buyer;
@@ -37,11 +38,11 @@ public class Sale {
         this.seller = seller;
     }
 
-    public Buyer getBuyer() {
+    public Bidder getBuyer() {
         return buyer;
     }
 
-    public void setBuyer(Buyer buyer) {
+    public void setBuyer(Bidder buyer) {
         this.buyer = buyer;
     }
 

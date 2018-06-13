@@ -5,35 +5,48 @@
  */
 package models;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  *
  * @author Jorrit
  */
-public class Bid {
-    
-     public UUID uuid;
-     public Buyer bidder;
-     public double amount;
-     public Auction auction;
+public class Bid implements Serializable {
 
-    public Bid(Buyer bidder, double amount, Auction auction) {
+    public UUID uuid;
+    public UUID auction;
+    public Bidder bidder;
+    public double amount;
+
+    public Bid(double amount) {
         this.uuid = UUID.randomUUID();
-        this.bidder = bidder;
         this.amount = amount;
+    }
+    
+    public Bid(Bidder bidder, UUID auction, double amount) {
+        this.bidder = bidder;
         this.auction = auction;
+        this.amount = amount;
     }
 
     public UUID getUuid() {
         return uuid;
     }
 
-    public Buyer getBidder() {
+    public Bidder getBidder() {
         return bidder;
     }
 
-    public void setBidder(Buyer bidder) {
+    public UUID getAuction() {
+        return auction;
+    }
+
+    public void setAuction(UUID auction) {
+        this.auction = auction;
+    }  
+
+    public void setBidder(Bidder bidder) {
         this.bidder = bidder;
     }
 
@@ -44,13 +57,4 @@ public class Bid {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-
-    public Auction getAuction() {
-        return auction;
-    }
-
-    public void setAuction(Auction auction) {
-        this.auction = auction;
-    }
-    
 }

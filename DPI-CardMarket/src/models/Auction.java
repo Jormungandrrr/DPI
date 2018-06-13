@@ -17,11 +17,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class Auction implements Serializable {
 
-    public UUID uuid;
-    public Card card;
-    public long end;
-    public Seller seller;
-    public double price;
+    private UUID uuid;
+    private Card card;
+    private long end;
+    private Seller seller;
+    private double price;
 
     public ArrayList<Bid> bids = new ArrayList<>();
 

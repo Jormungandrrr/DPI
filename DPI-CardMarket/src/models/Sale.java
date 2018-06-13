@@ -14,18 +14,20 @@ import java.util.UUID;
  */
 public class Sale implements Serializable {
 
-    public UUID uuid;
-    public Seller seller;
-    public Card card;
-    public Bidder buyer;
-    public double amount;
+    private UUID uuid;
+    private Seller seller;
+    private Card card;
+    private Bidder buyer;
+    private double amount;
+    private UUID auctionUUID;
 
-    public Sale(Seller seller, Bidder buyer, Card card, double amount) {
+    public Sale(Seller seller, Bidder buyer, Card card, double amount, UUID auction) {
         this.uuid = UUID.randomUUID();
         this.seller = seller;
         this.buyer = buyer;
         this.amount = amount;
         this.card = card;
+        this.auctionUUID = auction;
     }
 
     public UUID getUuid() {
@@ -56,9 +58,25 @@ public class Sale implements Serializable {
         this.amount = amount;
     }
 
+    public UUID getAuctionUUID() {
+        return auctionUUID;
+    }
+
+    public void setAuctionUUID(UUID auctionUUID) {
+        this.auctionUUID = auctionUUID;
+    }
+
+    public Card getCard() {
+        return card;
+    }
+
+    public void setCard(Card card) {
+        this.card = card;
+    }
+
     @Override
     public String toString() {
-        return this.buyer.name + " Bought " + this.card.name + " for €" + this.amount;
+        return this.buyer.getName() + " Bought " + this.card.getName() + " for €" + this.amount;
     }
 
 }

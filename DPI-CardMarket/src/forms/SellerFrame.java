@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -57,7 +58,7 @@ public class SellerFrame extends JFrame {
      * Create the frame.
      */
     public SellerFrame(Seller s) {
-        setTitle(s.name + " - Auctions");
+        setTitle(s.getName() + " - Auctions");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 684, 619);
@@ -196,8 +197,18 @@ public class SellerFrame extends JFrame {
             }
         }
     }
+    
+    public void removeAuction(UUID auctionUUID) {
+        for (int i = 0; i < auctionList.getSize(); i++) {
+            Auction auction = auctionList.get(i);
+            if (auction.getUuid().equals(auctionUUID)) {
+                auctionList.remove(i);
+            }
+        }
+    }
 
     public void addSale(Sale s) {
+        removeAuction(s.getAuctionUUID());
         saleList.addElement(s);
         salelist.repaint();
     }

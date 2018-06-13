@@ -15,11 +15,11 @@ import java.util.UUID;
  */
 public class Seller implements Serializable {
     
-    public UUID uuid;
-    public String name;
-    public double money;
-    public ArrayList<Card> cards;
-    public ArrayList<Auction> auctions = new ArrayList<Auction>();
+    private UUID uuid;
+    private String name;
+    private double money;
+    private ArrayList<Card> cards;
+    private ArrayList<Auction> auctions = new ArrayList<Auction>();
 
     public Seller(String name) {
         this.uuid = UUID.randomUUID();

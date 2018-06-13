@@ -13,11 +13,11 @@ import java.util.UUID;
  * @author Jorrit
  */
 public class Card implements Serializable {
-    public UUID uuid;
-    public String name;
-    public String color;
-    public String type;
-    public String cmc;
+    private UUID uuid;
+    private String name;
+    private String color;
+    private String type;
+    private String cmc;
 
     public Card(String name, String color, String type, String cmc) {
         this.uuid = UUID.randomUUID();

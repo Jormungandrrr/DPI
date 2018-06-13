@@ -70,8 +70,8 @@ public class BidderFrame extends JFrame {
      */
     public BidderFrame(Bidder b) {
         this.bidder = b;
-        this.name = bidder.name;
-        setTitle(bidder.name);
+        this.name = bidder.getName();
+        setTitle(bidder.getName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 450, 300);
         contentPane = new JPanel();
@@ -127,7 +127,7 @@ public class BidderFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 Auction a = list.getSelectedValue();
                 double amount = Double.parseDouble((tfReply.getText()));
-                BidGateway.makeBid(new Bid(b, a.uuid, amount));
+                BidGateway.makeBid(new Bid(b, a.getUuid(), amount));
             }
         });
         GridBagConstraints gbc_btncreateBid = new GridBagConstraints();

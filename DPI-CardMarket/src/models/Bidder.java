@@ -14,9 +14,9 @@ import java.util.UUID;
  * @author Jorrit
  */
 public class Bidder implements Serializable {
-    public UUID uuid;
-    public String name;
-    public ArrayList<String> colors;
+    private UUID uuid;
+    private String name;
+    private ArrayList<String> colors;
 
     public Bidder(String name) {
         this.uuid = UUID.randomUUID();

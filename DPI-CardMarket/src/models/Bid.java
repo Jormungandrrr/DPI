@@ -14,10 +14,10 @@ import java.util.UUID;
  */
 public class Bid implements Serializable {
 
-    public UUID uuid;
-    public UUID auction;
-    public Bidder bidder;
-    public double amount;
+    private UUID uuid;
+    private UUID auction;
+    private Bidder bidder;
+    private double amount;
 
     public Bid(double amount) {
         this.uuid = UUID.randomUUID();

@@ -6,11 +6,7 @@
 package service;
 
 import forms.BrokerFrame;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,11 +60,11 @@ public class BrokerGateway implements MessageListener {
             if (a.bids.size() > 0) {
                 Bid highestBid = new Bid(-1);
                 for (Bid b : a.bids) {
-                    if (b.amount > highestBid.amount) {
+                    if (b.getAmount() > highestBid.getAmount()) {
                         highestBid = b;
                     }
                 }
-                AuctionSender.sendmessage(new Sale(a.seller, highestBid.bidder, a.card, highestBid.amount));
+                AuctionSender.sendmessage(new Sale(a.getSeller(), highestBid.getBidder(), a.getCard(), highestBid.getAmount(), a.getUuid()));
             }
         } catch (JMSException ex) {
             Logger.getLogger(BrokerGateway.class.getName()).log(Level.SEVERE, null, ex);
@@ -94,10 +90,10 @@ public class BrokerGateway implements MessageListener {
                     Bid b = (Bid) o;
                     if (auctions.containsKey(b.getAuction())) {
                         Auction a = auctions.get(b.getAuction());
-                        if (a.price < b.amount) {
+                        if (a.getPrice() < b.getAmount()) {
                             auctions.remove(b.getAuction());
                             a.bids.add(b);
-                            a.price = b.amount;
+                            a.setPrice(b.getAmount());
                             auctions.put(a.getUuid(), a);
                             frame.updateAuction(a);
                             clientSender.sendmessage(a);
